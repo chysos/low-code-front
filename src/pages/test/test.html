@@ -1,0 +1,228 @@
+
+          <!--view
+            style="
+              height: 100px;
+              width: 370px;
+              font-size: 30px;
+              text-align: center;
+            "
+            v-on:drop.native="drop($event)"
+            v-on:dragover.native="dropover($event)"
+            v-on:dragleave.native="dragleave($event)"
+            class="content-drag-leave"
+          >
+            请将容器组件拖入
+          </view-->
+          
+
+
+
+<!--修改属性-->
+<r-cell
+v-if="item.type == 'r-cell'"
+:list="item.option"
+:title="item.title"
+></r-cell>
+<!--修改属性-->
+<r-dropdown
+v-if="item.type == 'r-dropdown'"
+:option="item.option"
+:dd_ref="$u.guid()"
+></r-dropdown>
+<r-fingerprint
+:option="item.option"
+v-if="item.type == 'r-fingerprint'"
+></r-fingerprint>
+<!--修改属性-->
+<r-form
+v-if="item.type == 'r-form'"
+:list="item.option"
+@get_form_data="item.get_form_data"
+:form_ref="$u.guid()"
+:form.sync="item.form"
+></r-form>
+
+<r-grid v-if="item.type == 'r-grid'" :option="item.option"></r-grid>
+<!--修改-->
+<r-map v-if="item.type == 'r-map'"></r-map>
+<r-me :option="item.option" v-if="item.type == 'r-me'"></r-me>
+<!--修改-->
+<r-qrcode v-if="item.type == 'r-qrcode'"></r-qrcode>
+<!--修改-->
+<r-readmore
+v-if="item.type == 'r-readmore'"
+:option="item.option"
+:readmore_ref="$u.guid()"
+></r-readmore>
+
+
+
+
+          <!--容器列表>
+        <view
+          style="
+            width: 375px;
+            float: left;
+            margin-left: 100px;
+            border-style: solid;
+          "
+          ref="containers"
+        >
+          <view
+            v-for="(item, index) in options"
+            :key="index"
+            draggable="true"
+            @dragstart="containerdrag(index)"
+            @click="changeCurrentContainer(index)"
+            @dragover.prevent
+            @drop="swapCurrentContainer($event, index)"
+          >
+            <view v-if="index != currentContainer" class="containers">
+              {{ item.type }}容器
+            </view>
+            <view v-if="index == currentContainer" class="selected_containers">
+              {{ item.type }}容器
+              <u-button
+                style="float: right"
+                size="mini"
+                @click="deleteContainers(index)"
+                >删除</u-button
+              >
+            </view>
+          </view>
+        </view-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <template>
+          <view style="margin-top: 12px; margin-left: 6px; border: 1px dotted #000">
+            <view class="comInfo">
+              <text class="comptype">组件类型：普通输入框</text>
+            </view>
+            <view class="comInfo">
+              <text class="comptype">组件id：{{ option.id }}</text>
+            </view>
+            <view class="comInfo">
+              <u-field v-model="option.option.label" label="左侧标题"></u-field>
+            </view>
+            <view class="comInfo">
+              <u-field v-model="option.option.value" label="默认数值"></u-field>
+            </view>
+            <view class="comInfo">
+              <u-field v-model="option.option.rFormRate" label="星星数量"></u-field>
+            </view>
+            <view class="comInfo">
+              <text class="comptype">是否有按钮</text
+              ><u-switch v-model="btnChecked"></u-switch>
+            </view>
+            <view v-if="btnChecked">
+              <view class="comInfo">
+                <u-field
+                  v-model="option.option.btn.codeText"
+                  label="按钮文字"
+                ></u-field>
+              </view>
+            </view>
+            <MonacoEditor
+              height="600"
+              language="javascript"
+              :code="code"
+              :editorOptions="options"
+              @mounted="onMounted"
+              @codeChange="onCodeChange"
+            >
+            </MonacoEditor>
+          </view>
+        </template>
+        
+        <script>
+        import MonacoEditor from "vue-monaco-editor";
+        
+        export default {
+          name: "option-r-form-input-bar",
+          components: {
+            MonacoEditor,
+          },
+          props: {
+            option: {
+              type: Object,
+              require: true,
+            },
+          },
+          beforeMount() {
+            if (this.option.option.btn != undefined) this.btnChecked = true;
+          },
+          computed: {
+            code() {
+              return JSON.stringify(this.option);
+            },
+          },
+          data() {
+            return {
+              btnChecked: false,
+              options: {
+                selectOnLineNumbers: false,
+                foldingStrategy: "indentation", // 代码可分小段折叠
+                automaticLayout: true, // 自适应布局
+                overviewRulerBorder: false, // 不要滚动条的边框
+                autoClosingBrackets: true,
+                tabSize: 2, // tab 缩进长度
+                minimap: {
+                  enabled: false, // 不要小地图
+                },
+              },
+            };
+          },
+          watch: {
+            "option.id"(a, b) {
+              this.btnChecked = this.option.option.btn != undefined;
+            },
+            btnChecked(a, b) {
+              if (this.btnChecked)
+                this.$set(this.option.option, "btn", { codeText: "单击" });
+              else this.$delete(this.option.option, "btn");
+            },
+          },
+          methods: {
+            onMounted(editor) {
+              this.editor = editor;
+            },
+            onCodeChange(editor) {
+              console.log(editor.getValue());
+            },
+          },
+        };
+        </script>
+        
+        <style lang="scss">
+        .comInfo {
+          border: 1px dashed #606266;
+          font-size: 14px;
+          padding-bottom: 6px;
+          padding-top: 8px;
+          margin: 6px;
+          .comptype {
+            color: #606266;
+            padding: 6%;
+        
+            &:hover {
+              color: green;
+            }
+          }
+          &:hover {
+            border: 2px dotted blue;
+          }
+        }
+        </style>
